@@ -1,18 +1,7 @@
 pipeline {
     agent any
 
-    environment {
-        IMAGE_NAME = "attendance-app"
-        BUILD_TAG = "${BUILD_NUMBER}"
-    }
-
     stages {
-
-        stage('Clone') {
-            steps {
-                echo 'Cloning repository...'
-            }
-        }
 
         stage('Build Maven') {
             steps {
@@ -20,7 +9,7 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
+        stage('Test') {
             steps {
                 bat '.\\mvnw.cmd test'
             }
@@ -28,29 +17,24 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat "docker build -t %IMAGE_NAME%:%BUILD_TAG% ."
+                bat 'docker build -t attendance-app:latest .'
             }
         }
 
-        stage('Docker Images') {
+        stage('Run Container') {
             steps {
-                bat 'docker images'
+                bat 'docker rm -f attendance-container || exit 0'
+                bat 'docker run -d -p 8085:8081 --name attendance-container attendance-app:latest'
             }
         }
     }
 
     post {
-
         success {
-            echo 'Build Successful!'
+            echo "SUCCESS 🚀 Build Completed"
         }
-
         failure {
-            echo 'Build Failed!'
-        }
-
-        always {
-            echo 'Pipeline Finished'
+            echo "FAILED ❌ Check logs"
         }
     }
 }
