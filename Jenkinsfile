@@ -3,6 +3,11 @@ pipeline {
 
     stages {
 
+
+        triggers {
+            githubPush()
+        }
+
         stage('Build Maven') {
             steps {
                 bat '.\\mvnw.cmd clean package'
