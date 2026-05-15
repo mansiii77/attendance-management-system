@@ -5,6 +5,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/attendance")
 public class AttendanceController {
 
+    @GetMapping("/")
+    public String home() {
+        return "Attendance Management System Running Successfully!";
+    }
+
     @GetMapping("/status")
     public String status() {
         return "Attendance Service Running";
