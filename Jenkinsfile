@@ -1,12 +1,11 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     stages {
-
-
-        triggers {
-            githubPush()
-        }
 
         stage('Build Maven') {
             steps {
@@ -38,6 +37,7 @@ pipeline {
         success {
             echo "SUCCESS 🚀 Build Completed"
         }
+
         failure {
             echo "FAILED ❌ Check logs"
         }
