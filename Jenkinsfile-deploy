@@ -43,11 +43,6 @@ pipeline {
                     '''
 
                     bat '''
-                    docker rm -f attendance-staging || exit 0
-                    docker rm -f attendance-app || exit 0
-                    '''
-
-                    bat '''
                     FOR /f "tokens=*" %%i IN ('docker ps -aq') DO docker stop %%i
                     FOR /f "tokens=*" %%i IN ('docker ps -aq') DO docker rm %%i
                     '''
