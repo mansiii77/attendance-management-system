@@ -43,8 +43,8 @@ pipeline {
                     '''
 
                     bat '''
-                    docker stop attendance-staging >nul 2>&1
-                    docker rm attendance-staging >nul 2>&1
+                    docker stop attendance-staging >nul 2>&1 || ver >nul
+                    docker rm attendance-staging >nul 2>&1 || ver >nul
                     '''
 
                     bat '''
