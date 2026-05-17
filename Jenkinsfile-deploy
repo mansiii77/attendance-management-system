@@ -61,7 +61,7 @@ pipeline {
             emailext(
                 subject: "DEPLOYMENT SUCCESS - ${JOB_NAME}",
                 body: "Deployment completed successfully.",
-                to: "motgharemd@rknec.edu"
+                to: "mansimotghare167@gmail.com"
             )
         }
 
