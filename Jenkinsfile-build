@@ -1,0 +1,88 @@
+pipeline {
+    agent any
+
+    triggers {
+        pollSCM('* * * * *')
+    }
+
+    environment {
+        AWS_REGION = 'ap-south-1'
+        ECR_URI = '827306792789.dkr.ecr.ap-south-1.amazonaws.com/attendance-app'
+    }
+
+    stages {
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                url: 'https://github.com/mansiii77/attendance-management-system.git'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                bat '.\\mvnw.cmd test'
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                bat '.\\mvnw.cmd clean package'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                bat 'docker build -t attendance-app:%BUILD_NUMBER% .'
+            }
+        }
+
+        stage('ECR Login') {
+            steps {
+
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+
+                    bat '''
+                    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 827306792789.dkr.ecr.ap-south-1.amazonaws.com
+                    '''
+                }
+            }
+        }
+
+        stage('Tag Docker Image') {
+            steps {
+                bat 'docker tag attendance-app:%BUILD_NUMBER% %ECR_URI%:%BUILD_NUMBER%'
+            }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                bat 'docker push %ECR_URI%:%BUILD_NUMBER%'
+            }
+        }
+    }
+
+    post {
+
+        success {
+
+            emailext(
+                subject: "BUILD SUCCESS - ${JOB_NAME}",
+                body: "Build #${BUILD_NUMBER} completed successfully.",
+                to: "motgharemd@rknec.edu"
+            )
+        }
+
+        failure {
+
+            emailext(
+                subject: "BUILD FAILED - ${JOB_NAME}",
+                body: "Build #${BUILD_NUMBER} failed.",
+                to: "motgharemd@rknec.edu"
+            )
+        }
+    }
+}

@@ -1,0 +1,77 @@
+pipeline {
+
+    agent any
+
+    parameters {
+
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['Staging', 'Production'],
+            description: 'Select Environment'
+        )
+
+        string(
+            name: 'BUILD_NUMBER',
+            defaultValue: '1',
+            description: 'Docker Image Build Number'
+        )
+    }
+
+    environment {
+
+        AWS_REGION = 'ap-south-1'
+        ECR_URI = '827306792789.dkr.ecr.ap-south-1.amazonaws.com/attendance-app'
+    }
+
+    stages {
+
+        stage('Deploy Application') {
+
+            steps {
+
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-creds'
+                ]]) {
+
+                    bat '''
+                    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 827306792789.dkr.ecr.ap-south-1.amazonaws.com
+                    '''
+
+                    bat '''
+                    docker pull %ECR_URI%:%BUILD_NUMBER%
+                    '''
+
+                    bat '''
+                    docker rm -f attendance-staging || exit 0
+                    '''
+
+                    bat '''
+                    docker run -d -p 8085:8081 --name attendance-staging %ECR_URI%:%BUILD_NUMBER%
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+
+        success {
+
+            emailext(
+                subject: "DEPLOYMENT SUCCESS - ${JOB_NAME}",
+                body: "Deployment completed successfully.",
+                to: "motgharemd@rknec.edu"
+            )
+        }
+
+        failure {
+
+            emailext(
+                subject: "DEPLOYMENT FAILED - ${JOB_NAME}",
+                body: "Deployment failed.",
+                to: "motgharemd@rknec.edu"
+            )
+        }
+    }
+}
