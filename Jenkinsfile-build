@@ -81,7 +81,7 @@ pipeline {
             emailext(
                 subject: "BUILD FAILED - ${JOB_NAME}",
                 body: "Build #${BUILD_NUMBER} failed.",
-                to: "motgharemd@rknec.edu"
+                to: "mansimotghare167@gmail.com"
             )
         }
     }

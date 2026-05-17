@@ -70,7 +70,7 @@ pipeline {
             emailext(
                 subject: "DEPLOYMENT FAILED - ${JOB_NAME}",
                 body: "Deployment failed.",
-                to: "motgharemd@rknec.edu"
+                to: "mansimotghare167@gmail.com"
             )
         }
     }
